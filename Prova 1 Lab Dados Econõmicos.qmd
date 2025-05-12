@@ -1,0 +1,177 @@
+---
+title: "Indice de Gini"
+author: "Samuel Raduenz"
+format: html
+editor: visual
+---
+
+```{r}
+#| label: load-packages
+#| include: false
+
+# install.packages("WDI")
+library(WDI)
+# install.packages("tidyverse")
+library(tidyverse)
+# install.packages("dplyr")
+library(dplyr)
+# install.packages('scales')
+library(scales)
+
+options(scipen = 999) # REMOVER A NOT. CIENT.
+# DADOS EM PAINEL
+gini <- WDI(country = 'all',
+            indicator = 'SI.POV.GINI')
+# Cria a coluna categórica
+gini <- gini %>%
+  mutate(origem = if_else(country == "Brazil", "Brasil", "Outros países"))
+
+# CORTE TRANSVERSAL
+gini2021 <- WDI(country = 'all',
+                indicator = 'SI.POV.GINI',
+                start = 2021, end = 2021)
+
+# SÉRIE TEMPORAL
+ginichn_raw <- WDI(country    = 'CHN',
+                   indicator = 'SI.POV.GINI')
+
+```
+
+## VARIÁVEL
+
+O índice de gini é uma variável que mostra o qual desigual é a renda de um país, ele pode variar entre os valores de 0 e 1. Quanto mais perto do número 0 for o índice, mais igual é a divisão de renda do país, caso esteja mais próximo de 1, mais desigual é essa distribuição. Ou seja, não importa se o PIB do país é alto ou baixo, nesse índice é mostrado apenas se a renda está mais igualmente ou desigualmente dividido entre a população, assim, um país com baixo PIB pode ter um índice de gini melhor que um país com um alto PIB.
+
+## GRÁFICO DE DADOS EM PAINEL
+
+O gráfico apresentado mostra a evolução do Índice de Gini ao longo do tempo em diversos países, com destaque para o Brasil. Cada ponto representa o índice de um país em um determinado ano. As bolinhas cinza são os valores de outros países, enquanto as bolinhas azuis representam o Brasil. Observa-se que o Brasil esteve entre os países com maior desigualdade por muitos anos, embora tenha apresentado uma leve queda recente. Os valores do Índice de Gini estão multiplicados por 100 para facilitar a leitura. Esse tipo de gráfico em painel permite comparar de forma visual a posição relativa do Brasil em relação ao resto do mundo.
+
+```{r}
+#| label: grafgini
+#| warning: false
+#| echo: false
+
+grafpainelgini <- ggplot(gini, aes(
+  x = year,
+  y = SI.POV.GINI,
+  color = origem,
+  alpha = origem         # mapeia alpha a origem também
+)) +
+  geom_point() +
+  scale_color_manual(
+    name   = "Legenda:",
+    values = c("Brasil" = "blue", "Outros países" = "#95a5a6")
+  ) +
+  scale_alpha_manual(
+    values = c("Brasil" = 1, "Outros países" = 0.4),
+    guide  = "none"        # esconde a legenda de alpha, pois já temos a de cor
+  ) +
+  labs(
+    title = "Evolução do Índice de Gini Mundial\ncom Destaque para o Brasil",
+    x     = "Ano",
+    y     = "Índice de Gini (x100)"
+  ) +
+  theme_minimal(base_size = 14) + 
+  theme(
+    plot.title      = element_text(size = 20, face = "bold", color = "#2c3e50", hjust = 0.5),
+    axis.title      = element_text(size = 16, color = "#34495e"),
+    axis.text.x     = element_blank(),   # oculta os nomes dos países para não poluir
+    axis.text.y     = element_text(color = "#2c3e50"),
+    legend.position = "bottom"
+  )
+
+grafpainelgini
+
+
+```
+
+## CORTE TRANSVERSAL
+
+O gráfico de barras mostra o Índice de Gini de diversos países no ano de 2023, organizados do maior para o menor. Cada barra representa um país e o Brasil é destacado em azul, enquanto os demais países estão em cinza. Nota-se que o Brasil segue entre os países com maior desigualdade de renda do mundo. Assim como no gráfico anterior, os valores estão multiplicados por 100. Essa representação facilita a comparação direta entre os países em um único ano.
+
+```{r}
+#| label: grafgini2021  
+#| warning: false 
+#| echo: false  
+
+# Filtrando países com Gini disponível
+gini2021 <- gini2021 %>% filter(!is.na(SI.POV.GINI))
+
+# Adiciona uma variável para destacar o Brasil
+gini2021 <- gini2021 %>%
+  mutate(cor = ifelse(country == "Brazil", "Brasil", "Outros"))
+
+# Ordena os países pelo Gini para visualização mais limpa
+gini2021 <- gini2021 %>%
+  arrange(desc(SI.POV.GINI)) %>%
+  mutate(country = factor(country, levels = unique(country)))
+
+# Gráfico com barras e destaque no Brasil, agora com legenda embaixo
+grafcortegini <- ggplot(gini2021, aes(x = country, y = SI.POV.GINI, fill = cor)) +
+  geom_bar(stat = "identity") +
+  # Linha ajustada: define título da legenda e rótulos
+  scale_fill_manual(
+    name   = "Legenda:", 
+    values = c("Brasil" = "blue", "Outros" = "#95a5a6"),
+    labels = c("Brasil", "Outros países")
+  ) +
+  labs(
+    title = "Índice de Gini dos Países em 2023 com\nDestaque para o Brasil",
+    x     = "Países",
+    y     = "Índice de Gini (x100)"
+  ) +
+  theme(
+    plot.title      = element_text(size = 20, face = "bold", color = "#2c3e50", hjust = 0.5),
+    axis.title      = element_text(size = 16, color = "#34495e"),
+    axis.text.x     = element_blank(),   # oculta os nomes dos países para não poluir
+    axis.text.y     = element_text(color = "#2c3e50"),
+    # Linha ajustada: posiciona legenda embaixo
+    legend.position = "bottom"
+  )
+
+grafcortegini
+
+
+```
+
+## SÉRIE TEMPORAL
+
+O gráfico de linhas mostra a evolução do Índice de Gini da China desde 1990. Observa-se uma tendência de aumento da desigualdade até o início dos anos 2010, atingindo o pico em torno de 2010. A partir desse ponto, o índice começa a cair gradualmente, indicando uma melhora na distribuição de renda. Essa análise mostra como a desigualdade na China aumentou durante o período de rápido crescimento econômico e, posteriormente, passou por uma redução.
+
+```{r}
+#| label: dadospibbr  
+#| warning: false  
+#| echo: false    
+
+# preparar dados: filtrar NA e ordenar por ano
+ginichn <- ginichn_raw %>% 
+  filter(!is.na(SI.POV.GINI)) %>% 
+  arrange(year)
+
+# renomear coluna para algo mais legível (opcional)
+ginichn <- ginichn %>%
+  rename(Gini = SI.POV.GINI)
+
+# plotar
+grafseriegini <- ggplot(ginichn, aes(x = year, y = Gini)) +
+  geom_line(color = "#1b2a49", size = 1) +
+  geom_point(color = "blue", size = 2) +
+  scale_x_continuous(
+    breaks = seq(min(ginichn$year), max(ginichn$year), by = 5),
+    limits = c(min(ginichn$year), max(ginichn$year))
+  ) +
+  labs(
+    title = "Evolução do Índice de Gini da China",
+    x     = "Ano",
+    y     = "Índice de Gini (x100)"
+  ) +
+  theme_minimal(base_family = "sans") +
+  theme(
+    plot.title   = element_text(size = 16, face = "bold", color = "#2c3e50", hjust = 0.5),
+    axis.title   = element_text(size = 12, color = "#34495e"),
+    axis.text    = element_text(color = "#2c3e50"),
+    panel.grid  = element_line(color = "gray"),
+    panel.background = element_rect(fill = "gray90")
+  )
+
+grafseriegini
+```
