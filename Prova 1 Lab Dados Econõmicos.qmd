@@ -86,7 +86,7 @@ grafpainelgini
 
 ## CORTE TRANSVERSAL
 
-O gráfico de barras mostra o Índice de Gini de diversos países no ano de 2023, organizados do maior para o menor. Cada barra representa um país e o Brasil é destacado em azul, enquanto os demais países estão em cinza. Nota-se que o Brasil segue entre os países com maior desigualdade de renda do mundo. Assim como no gráfico anterior, os valores estão multiplicados por 100. Essa representação facilita a comparação direta entre os países em um único ano.
+O gráfico de barras mostra o Índice de Gini de diversos países no ano de 2021, organizados do maior para o menor. Cada barra representa um país e o Brasil é destacado em azul, enquanto os demais países estão em cinza. Nota-se que o Brasil segue entre os países com maior desigualdade de renda do mundo. Assim como no gráfico anterior, os valores estão multiplicados por 100. Essa representação facilita a comparação direta entre os países em um único ano.
 
 ```{r}
 #| label: grafgini2021  
@@ -115,7 +115,7 @@ grafcortegini <- ggplot(gini2021, aes(x = country, y = SI.POV.GINI, fill = cor))
     labels = c("Brasil", "Outros países")
   ) +
   labs(
-    title = "Índice de Gini dos Países em 2023 com\nDestaque para o Brasil",
+    title = "Índice de Gini dos Países em 2021 com\nDestaque para o Brasil",
     x     = "Países",
     y     = "Índice de Gini (x100)"
   ) +
