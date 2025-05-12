@@ -39,7 +39,7 @@ ginichn_raw <- WDI(country    = 'CHN',
 
 ## VARIÁVEL
 
-O índice de gini é uma variável que mostra o qual desigual é a renda de um país, ele pode variar entre os valores de 0 e 1. Quanto mais perto do número 0 for o índice, mais igual é a divisão de renda do país, caso esteja mais próximo de 1, mais desigual é essa distribuição. Ou seja, não importa se o PIB do país é alto ou baixo, nesse índice é mostrado apenas se a renda está mais igualmente ou desigualmente dividido entre a população, assim, um país com baixo PIB pode ter um índice de gini melhor que um país com um alto PIB.
+O índice de gini é uma variável que mostra o quão desigual é a renda de um país, ele pode variar entre os valores de 0 e 1. Quanto mais perto do número 0 for o índice, mais igual é a divisão de renda do país, caso esteja mais próximo de 1, mais desigual é essa distribuição. Ou seja, não importa se o PIB do país é alto ou baixo, nesse índice é mostrado apenas se a renda está mais igualmente ou desigualmente dividido entre a população, assim, um país com baixo PIB pode ter um índice de gini melhor que um país com um alto PIB.
 
 ## GRÁFICO DE DADOS EM PAINEL
 
