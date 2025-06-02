@@ -1,0 +1,159 @@
+---
+title: "Análise: Títulos emitidos por Governo Geral – Moeda Nacional"
+author: "Samuel Raduenz"
+editor: visual
+---
+
+## **1. Descrição da Variável**
+
+A variável 29169: “Títulos emitidos por Governo Geral – Moeda Nacional” indica o saldo em final de período das posições de títulos de dívida emitidos pelo governo (federal, estaduais e municipais) em reais. Esses dados são divulgados de forma trimestral, em milhões de reais, cobrindo o período de 1º de abril de 2018 até outubro de 2024. A série inclui diversos tipos de títulos públicos (e privados emitidos por entes governamentais), mas exclui emitentes estatais e aqueles em moeda estrangeira. É produzida pelo Departamento de Estatísticas do Banco Central do Brasil e reflete o valor de mercado ou nominal, conforme disponibilidade de precificação
+
+-----------------------------------------------------------------------
+
+## **2. Importância da Variável**
+
+  Essa variável mostra quanto o governo emitiu em títulos no mercado interno, em reais. Ela é importante porque ajuda a entender o tamanho da dívida pública e como isso afeta a economia. Quando esse número cresce, pode influenciar as decisões de política monetária, como a taxa de juros, para controlar a inflação. Além disso, investidores usam esse dado pra avaliar o risco do país. Em resumo, é um indicativo de saúde fiscal e da confiança que o governo desperta no mercado.
+
+------------------------------------------------------------------------
+
+## **3. Análise Crítica**
+
+A série “Títulos emitidos por Governo Geral – Moeda Nacional” mostra o estoque nominal de papéis emitidos internamente pelo Tesouro até outubro de 2024. Em termos gerais, o crescimento significativo dessa dívida decorreu primeiramente do auxílio emergencial na pandemia, quando a emissão saltou para financiar gastos extraordinários em 2020–2021. Esse movimento elevou a dívida interna de R$ 6,27 tri em 2023 para R$ 6,97 tri em 2024, um aumento de 11,13% no ano 
+
+Como o dado é em valores nominais, não há ajuste inflacionário. Assim, parte do crescimento reflete a desvalorização do real em 2021, quando a inflação anual ultrapassou 10%: títulos indexados ao IPCA subiram em volume, mas isso não representou emissão de dívida “real” adicional, apenas recomposição de valor para os investidores 
+
+A estrutura da dívida interna também reforça riscos. No final de 2024, cerca de 46,13% dos títulos estavam atrelados à Selic, 27,01% a índices de preços e 22,14% prefixados. Com a Selic mantendo-se alta (13,75% até agosto/2023), rolamentos frequentes oneraram o orçamento público, forçando o Tesouro a emitir papéis mais longos para alongar o perfil de vencimento—mas a duração média ainda ficou baixa, o que exige novas emissões a cada ano enquanto os juros estiverem elevados.
+
+Por fim, embora a emissão tenha servido para acomodar despesas emergenciais e demandas obrigatórias, o alto estoque nominal compromete parte significativa da receita no pagamento de juros. Sem cruzar com dados de PIB e receitas, essa variável não permite avaliar sustentabilidade completa; porém, mostra que o Tesouro precisou recorrer fortemente ao mercado interno e ainda enfrenta custos elevados até que a Selic e a inflação retornem a patamares mais baixos.
+
+------------------------------------------------------------------------
+
+## **4. Gráfico**
+
+```{r setup, include=FALSE, echo=FALSE}
+# Opcional: definir configurações globais do knitr/quarto
+knitr::opts_chunk$set(
+  echo = TRUE,
+  warning = FALSE,
+  message = FALSE,
+  fig.width = 8,
+  fig.height = 5
+)
+```
+
+
+```{r pacotes, echo=FALSE}
+# Caso ainda não tenha instalado algum pacote, descomente a linha abaixo:
+# install.packages(c("GetBCBData", "tidyverse", "gganimate", "rsvg"))
+
+# Carrega os pacotes necessários
+library(GetBCBData)   # Para baixar séries do Banco Central
+library(tidyverse)    # Manipulação de dados e ggplot2
+library(gganimate)    # Para criar animações
+```
+
+
+```{r obter_dados, echo=FALSE, include=FALSE}
+# 1. Definir o ID da série
+my_id <- c(moeda_nacional = 29169)
+
+# 2. Baixar dados do BCB usando GetBCBData
+moeda_nacional <- gbcbd_get_series(
+  id         = my_id,
+  first.date = "2018-04-01",  # Data inicial (pode ser alterada conforme necessidade)
+  last.date  = Sys.Date()     # Até a data de hoje
+) %>%
+  # 3. Renomear colunas para facilitar entendimento
+  rename(
+    data  = ref.date,  # coluna de data
+    valor = value      # coluna de valor
+  ) %>%
+  # 4. Criar coluna de ano (para rótulos de texto)
+  mutate(
+    ano = format(data, "%Y")
+  )
+
+# Verificar as primeiras linhas (para garantir que está correto)
+head(moeda_nacional)
+```
+
+
+```{r limites_y, echo=FALSE, include=FALSE}
+# Calcula o intervalo mínimo e máximo de 'valor'
+y_limits <- range(moeda_nacional$valor, na.rm = TRUE)
+```
+
+
+```{r grafico_estatico, echo=FALSE, include=FALSE}
+# Criar gráfico estático com linha e pontos
+p <- moeda_nacional %>%
+  ggplot(aes(x = data, y = valor, group = 1)) +
+  geom_line(color = "lightblue", size = 2) +     # Linha azul clara e mais grossa
+  geom_point(color = "darkblue", size = 3) +     # Pontos maiores em azul escuro
+  geom_text(aes(label = format(
+                valor, 
+                big.mark    = ".", 
+                decimal.mark = ",", 
+                scientific   = FALSE, 
+                nsmall       = 0
+             )), 
+            vjust = -1, 
+            color = "darkblue", 
+            size = 4
+            ) +                           # Rótulos de ano acima dos pontos
+  scale_y_continuous(
+    limits = y_limits,
+    labels = function(x) {
+      # Formatação com separador de milhar como ponto e decimal como vírgula
+      format(x, big.mark = ".", decimal.mark = ",", scientific = FALSE)
+    }
+  ) +
+  labs(
+    title    = "Títulos emitidos por Governo Geral:\nMoeda Nacional",
+    x        = "Data",
+    y        = "R$ (milhões)"
+  ) +
+  theme_minimal(base_size = 14) +  # Tema limpo, com texto maior
+  theme(
+    plot.title    = element_text(hjust = 0.5, size = 16, margin(b = 10)),
+    axis.title.x  = element_text(size = 10),
+    axis.title.y  = element_text(size = 10),
+    axis.text.x   = element_text(size = 6),
+    axis.text.y   = element_text(size = 6), 
+    plot.margin  = margin(t = 20, r = 15, b = 15, l = 15)
+  )
+
+# Exibir o gráfico estático
+p
+```
+
+
+```{r animacao, eval=TRUE, echo=FALSE, include=FALSE}
+# 1. Definir animação com transition_reveal (desenha aos poucos conforme a data avança)
+anim <- p +
+  transition_reveal(along = data) +
+  ease_aes('linear')
+
+# 2. Renderizar a animação para visualização
+#    - nframes: número de quadros (frames) no GIF
+#    - fps: quadros por segundo
+#    - width / height: dimensão em pixels
+#    - units e res: unidades e resolução, caso seja necessário ajustar
+anim_gif <- animate(
+  anim,
+  nframes = 600,
+  fps     = 60,
+  width   = 1000,
+  height  = 1000,
+  units   = "px"
+)
+
+# 3. Salvar o GIF em disco (no mesmo diretório do .qmd)
+anim_save("animacao_moeda_nacional.gif", animation = anim_gif)
+```
+
+
+```{r mostrar_gif, echo=FALSE}
+# Exibir no slide ou saída HTML a animação gerada
+knitr::include_graphics("animacao_moeda_nacional.gif")
+```
